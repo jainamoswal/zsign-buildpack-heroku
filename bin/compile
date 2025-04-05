@@ -15,7 +15,7 @@ indent() {
 
 disp "Cloning zsign"
 cd "$BUILD_DIR"
-git clone --depth=1 "$ZSIGN_REPO" zsign | indent
+git clone "$ZSIGN_REPO" zsign | indent
 
 disp "Building zsign"
 cd zsign/build/linux
