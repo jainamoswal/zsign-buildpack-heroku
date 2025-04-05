@@ -1,29 +1,41 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+
+set -eo pipefail
 
 BUILD_DIR=$1
-CACHE_DIR=$2
+ZSIGN_REPO="https://github.com/zhlynn/zsign.git"
 
-echo ">>> Cloning and building zsign..."
+disp() {
+  echo "-----> $*"
+}
 
-git clone https://github.com/zhlynn/zsign.git zsign
+indent() {
+  sed -u 's/^/       /'
+}
+
+disp "Cloning zsign"
+cd "$BUILD_DIR"
+git clone --depth=1 "$ZSIGN_REPO" zsign | indent
+
+disp "Building zsign"
 cd zsign/build/linux
+make clean | indent
+make | indent
 
-make clean
-make
+disp "Preparing zsign binary"
+ZBIN_PATH="$BUILD_DIR/zsign/bin/zsign"
+INSTALL_DIR="$BUILD_DIR/vendor/zsign"
+mkdir -p "$INSTALL_DIR/bin"
+cp "$ZBIN_PATH" "$INSTALL_DIR/bin/"
+chmod +x "$INSTALL_DIR/bin/zsign"
 
-# Define the path to the built binary
-ZBIN="../../bin/zsign"
+disp "Creating PROFILE_PATH"
+PROFILE_PATH="$BUILD_DIR/.profile.d"
+mkdir -p "$PROFILE_PATH"
 
-# Check if the binary was built successfully
-if [ ! -f "$ZBIN" ]; then
-    echo "❌ Build failed: zsign binary not found at $ZBIN"
-    exit 1
-fi
+disp "Exporting PATH"
+cat <<EOF >"${PROFILE_PATH}/zsign.sh"
+export PATH="\$HOME/vendor/zsign/bin:\$PATH"
+EOF
 
-echo ">>> Moving zsign to bin directory..."
-mkdir -p "$BUILD_DIR/bin"
-cp "$ZBIN" "$BUILD_DIR/bin/"
-chmod +x "$BUILD_DIR/bin/zsign"
-
-echo "✅ zsign built and installed at $BUILD_DIR/bin/zsign"
+disp "✅ zsign built and installed successfully"
