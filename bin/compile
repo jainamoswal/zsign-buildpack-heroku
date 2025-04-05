@@ -1,41 +1,18 @@
-#!/usr/bin/env bash
-
-set -eo pipefail
-
+#!/bin/sh
 BUILD_DIR=$1
-ZSIGN_REPO="https://github.com/zhlynn/zsign.git"
 
-disp() {
-  echo "-----> $*"
-}
+echo "Installing zsign..."
 
-indent() {
-  sed -u 's/^/       /'
-}
+apt-get update
+apt-get install -y git make g++ pkg-config libssl-dev libminizip-dev zlib1g-dev
 
-disp "Installing dependencies"
-apt-get update | indent
-apt-get install -y git cmake make clang openssl libssl-dev | indent
+git clone https://github.com/zhlynn/zsign.git /tmp/zsign
+cd /tmp/zsign/build/linux
+make clean && make
 
-disp "Cloning zsign repository"
-cd /tmp
-git clone "$ZSIGN_REPO" installation | indent
+mkdir -p $BUILD_DIR/bin
+cp zsign $BUILD_DIR/bin/zsign
 
-disp "Building zsign"
-cd installation
-chmod +x INSTALL.sh
-./INSTALL.sh | indent
+chmod +x $BUILD_DIR/bin/zsign
 
-disp "Moving zsign binary to build bin directory"
-mkdir -p "$BUILD_DIR/vendor/zsign"
-mv build/zsign "$BUILD_DIR/vendor/zsign/"
-
-disp "Creating .profile.d script for PATH"
-PROFILE_PATH="$BUILD_DIR/.profile.d"
-mkdir -p "$PROFILE_PATH"
-
-cat <<EOF > "${PROFILE_PATH}/zsign.sh"
-export PATH="\$HOME/vendor/zsign:\$PATH"
-EOF
-
-disp "zsign installed successfully and added to PATH"
+echo "zsign installed in $BUILD_DIR/bin"

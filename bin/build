@@ -1,3 +1,2 @@
 #!/bin/sh
-echo "zsign"
 exit 0
