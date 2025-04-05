@@ -5,18 +5,19 @@ BUILD_DIR=$1
 CACHE_DIR=$2
 
 echo ">>> Cloning and building zsign..."
-TMP_BUILD_DIR=$(mktemp -d)
 
-git clone https://github.com/zhlynn/zsign.git "$TMP_BUILD_DIR/zsign"
-cd "$TMP_BUILD_DIR/zsign/build/linux"
+git clone https://github.com/zhlynn/zsign.git zsign
+cd zsign/build/linux
 
 make clean
 make
 
-# Check if zsign binary exists
+# Define the path to the built binary
 ZBIN="../../bin/zsign"
+
+# Check if the binary was built successfully
 if [ ! -f "$ZBIN" ]; then
-    echo "❌ zsign build failed: $ZBIN not found!"
+    echo "❌ Build failed: zsign binary not found at $ZBIN"
     exit 1
 fi
 
