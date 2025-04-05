@@ -4,8 +4,6 @@ set -e
 BUILD_DIR=$1
 CACHE_DIR=$2
 
-echo ">>> Installing dependencies..."
-
 echo ">>> Cloning and building zsign..."
 TMP_BUILD_DIR=$(mktemp -d)
 
@@ -15,9 +13,16 @@ cd "$TMP_BUILD_DIR/zsign/build/linux"
 make clean
 make
 
+# Check if zsign binary exists
+ZBIN="../../bin/zsign"
+if [ ! -f "$ZBIN" ]; then
+    echo "❌ zsign build failed: $ZBIN not found!"
+    exit 1
+fi
+
 echo ">>> Moving zsign to bin directory..."
 mkdir -p "$BUILD_DIR/bin"
-cp zsign "$BUILD_DIR/bin/"
+cp "$ZBIN" "$BUILD_DIR/bin/"
 chmod +x "$BUILD_DIR/bin/zsign"
 
-echo ">>> zsign built and installed at $BUILD_DIR/bin/zsign"
+echo "✅ zsign built and installed at $BUILD_DIR/bin/zsign"
