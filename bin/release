@@ -1,6 +1,0 @@
-#!/bin/sh
-cat <<EOF
----
-config_vars:
-  PATH: bin:\$PATH
-EOF
