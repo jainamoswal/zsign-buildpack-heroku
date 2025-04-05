@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+BUILD_DIR=$1
+ZSIGN_REPO="https://github.com/zhlynn/zsign.git"
+
+disp() {
+  echo "-----> $*"
+}
+
+indent() {
+  sed -u 's/^/       /'
+}
+
+disp "Installing dependencies"
+apt-get update | indent
+apt-get install -y git cmake make clang openssl libssl-dev | indent
+
+disp "Cloning zsign repository"
+cd /tmp
+git clone "$ZSIGN_REPO" installation | indent
+
+disp "Building zsign"
+cd installation
+chmod +x INSTALL.sh
+./INSTALL.sh | indent
+
+disp "Moving zsign binary to build bin directory"
+mkdir -p "$BUILD_DIR/vendor/zsign"
+mv build/zsign "$BUILD_DIR/vendor/zsign/"
+
+disp "Creating .profile.d script for PATH"
+PROFILE_PATH="$BUILD_DIR/.profile.d"
+mkdir -p "$PROFILE_PATH"
+
+cat <<EOF > "${PROFILE_PATH}/zsign.sh"
+export PATH="\$HOME/vendor/zsign:\$PATH"
+EOF
+
+disp "zsign installed successfully and added to PATH"
