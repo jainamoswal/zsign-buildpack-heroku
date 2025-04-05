@@ -5,18 +5,6 @@ BUILD_DIR=$1
 CACHE_DIR=$2
 
 echo ">>> Installing dependencies..."
-apt-get update && apt-get install -y \
-    git \
-    make \
-    g++ \
-    pkg-config \
-    libssl-dev \
-    libminizip-dev \
-    zlib1g-dev \
-    libbz2-dev \
-    liblzma-dev \
-    libzstd-dev \
-    && rm -rf /var/lib/apt/lists/*
 
 echo ">>> Cloning and building zsign..."
 TMP_BUILD_DIR=$(mktemp -d)
