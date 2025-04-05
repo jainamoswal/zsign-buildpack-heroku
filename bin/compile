@@ -1,18 +1,29 @@
 #!/bin/sh
 BUILD_DIR=$1
 
-echo "Installing zsign dependencies..."
+echo ">> Installing zsign dependencies..."
 
 apt-get update
-apt-get install -y git make g++ pkg-config \
-    libssl-dev zlib1g-dev libzip-dev unzip
+apt-get install -y git make g++ unzip libssl-dev zlib1g-dev cmake pkg-config
 
-echo "Cloning zsign..."
-git clone https://github.com/zhlynn/zsign.git /tmp/zsign
+# === Build minizip ===
+echo ">> Building minizip..."
+cd /tmp
+git clone https://github.com/nmoinvaz/minizip.git
+cd minizip
+mkdir build && cd build
+cmake .. -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=/tmp/minizip-install
+make -j4 && make install
 
-echo "Building zsign..."
-cd /tmp/zsign/build/linux
+export PKG_CONFIG_PATH="/tmp/minizip-install/lib/pkgconfig"
+export CFLAGS="-I/tmp/minizip-install/include"
+export LDFLAGS="-L/tmp/minizip-install/lib"
 
+# === Build zsign ===
+echo ">> Cloning zsign..."
+cd /tmp
+git clone https://github.com/zhlynn/zsign.git
+cd zsign/build/linux
 make clean && make
 
 if [ ! -f "zsign" ]; then
@@ -24,4 +35,4 @@ mkdir -p $BUILD_DIR/bin
 cp zsign $BUILD_DIR/bin/zsign
 chmod +x $BUILD_DIR/bin/zsign
 
-echo "✅ zsign installed at $BUILD_DIR/bin/zsign"
+echo "✅ zsign built and installed at $BUILD_DIR/bin/zsign"
